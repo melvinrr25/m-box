@@ -2,6 +2,7 @@
 
   window.mbx = window.mbx || {};
   var boxActive = false;
+  var stylesApplied = false;
   var htmlTag = select('html');
 
   function select(selector) {
@@ -39,8 +40,19 @@
     boxButtonsArea: 'text-align:right;padding:12px;',
     buttons: 'outline:0;border:none;border-radius:4px;text-decoration:none;' +
     'cursor:pointer;font-size:12px;display:inline-block;text-align:center;' +
-    'padding:8px 12px;background:#5da8c9;color:white;margin:0 5px 5px 0;font-weight:bold'
+    'padding:8px 12px;background:#5da8c9;color:white;margin:3px;font-weight:bold'
   };
+
+  function setCustomStyles(settings) {
+    if (settings.hasOwnProperty('styles') && stylesApplied === false) {
+      for (var className in settings.styles) {
+        for (var prop in settings.styles[className]) {
+          setStyle(select(className), prop, settings.styles[className][prop]);
+        }
+      }
+      stylesApplied = true;
+    }
+  }
 
   mbx = {
     close: function () {
@@ -49,6 +61,9 @@
         boxBase.parentNode.removeChild(boxBase);
         boxActive = false;
         htmlTag.style.overflow = 'auto';
+        if (stylesApplied === true) {
+          stylesApplied = false;
+        }
       }
     },
 
@@ -91,13 +106,25 @@
         if (settings.hasOwnProperty('title')) {
           boxTitle.innerHTML = settings.title;
         } else {
-          boxTitle.innerHTML = '&nbsp;';
+          boxTitle.parentNode.removeChild(boxTitle);
         }
         // set the content
         if (settings.hasOwnProperty('content')) {
           boxContent.innerHTML = settings.content;
         } else {
-          boxContent.innerHTML = '&nbsp;';
+          if (settings.template) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+              if (this.readyState == 4 && this.status == 200) {
+                boxContent.innerHTML = this.responseText;
+                setCustomStyles(settings);
+              }
+            };
+            xhttp.open('GET', settings.template, true);
+            xhttp.send();
+          } else {
+            boxContent.parentNode.removeChild(boxContent);
+          }
         }
         //set whether or not you can close the box
         if (settings.hasOwnProperty('closable')) {
@@ -158,12 +185,8 @@
           btn.focus();
         }
 
-        if (settings.hasOwnProperty('styles')) {
-          for (var className in settings.styles) {
-            for (var prop in settings.styles[className]) {
-              setStyle(select(className), prop, settings.styles[className][prop]);
-            }
-          }
+        if (!settings.template) {
+          setCustomStyles(settings);
         }
 
         if (callback && typeof callback === 'function') {
