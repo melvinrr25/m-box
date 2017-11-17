@@ -21,7 +21,7 @@
       '="mbx-content"></div><div class="mbx-buttons-area"></div></div></div>',
     boxBase: 'background:rgba(0,0,0,.5);position:' +
       'fixed;padding:10px;width:100%;top:0;left:0;box-sizing:border-box;' +
-      'z-index:100000;height:100%!important;display:block;',
+      'z-index:100000;height:100%!important;display:none;',
     boxBody: 'top:50%;-webkit-transform:translateY' +
       '(-50%);-moz-transform:translateY(-50%);-o-transform:translateY' +
       '(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%)' +
@@ -54,6 +54,14 @@
     }
   }
 
+  function appendBoxToBodyPage(pageBody){
+     pageBody.innerHTML += strings.boxStructure;
+  }
+
+  function showBox(boxBase){
+    setStyle(boxBase, 'display', 'block');
+  }
+  
   mbx = {
     close: function() {
       if (boxActive === true) {
@@ -70,8 +78,7 @@
     display: function(settings, callback) {
       if ((Object.prototype.toString.call(settings) === '[object Object]')) {
         mbx.close();
-        var pageBody = select('body');
-        pageBody.innerHTML += strings.boxStructure;
+        appendBoxToBodyPage(select('body'));
 
         var boxBase = select('.mbx-base');
         var boxBody = select('.mbx-body');
@@ -117,6 +124,7 @@
               if (this.readyState == 4 && this.status == 200) {
                 boxContent.innerHTML = this.responseText;
                 setCustomStyles(settings);
+                showBox(boxBase);
               }
             };
             xhttp.open('GET', settings.template, true);
@@ -186,6 +194,7 @@
 
         if (!settings.template) {
           setCustomStyles(settings);
+          showBox(boxBase);
         }
 
         if (callback && typeof callback === 'function') {
