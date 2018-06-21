@@ -115,7 +115,7 @@
       }
     },
 
-    display: function(settings, callback) {
+    display: function(settings) {
       if (Object.prototype.toString.call(settings) === "[object Object]") {
         mbx.close();
         appendBoxToBodyPage(select("body"));
@@ -220,10 +220,6 @@
           showBox(boxBase);
         }
 
-        if (callback && typeof callback === "function") {
-          callback();
-        }
-
         document.addEventListener("keyup", function(e) {
           if (settings.hasOwnProperty("allowedESC")) {
             if (settings.allowedESC === false) {
@@ -237,6 +233,13 @@
 
         htmlNode.style.overflow = "hidden";
         boxActive = true;
+        
+        if (settings.hasOwnProperty("onRender")) {
+          if (typeof settings.onRender === "function") {
+            settings.onRender();
+          }
+        }
+
         return;
       }
     }
